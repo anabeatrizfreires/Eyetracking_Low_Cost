@@ -1,20 +1,18 @@
-from imutils.video import VideoStream
-from imutils import face_utils
-import imutils
 import os
 import numpy as np
 import cv2
 import dlib
 import math
+import picamera
+import io
 from pyquaternion import Quaternion
 
-
-webcam = cv2.VideoCapture(2)
+#webcam = cv2.VideoCapture(2)
 webcam1 = cv2.VideoCapture(0)
-webcam.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-webcam.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-#webcam.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
-#webcam.set(cv2.CAP_PROP_FPS, 60)
+#webcam.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+#webcam.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+
+picamera = picamera.PiCamera()
 
 dirname = os.path.dirname(__file__)
 eye_detector =dlib.simple_object_detector(os.path.join(dirname, 'detector.svm'))
@@ -25,7 +23,12 @@ def midpoint(p1 ,p2):
     
 def main():
     while True:
-        _, frame_bgr = webcam.read()
+        stream = io.BytesIO()
+        picamera.capture(stream, format='jpeg')
+        data = np.fromstring(stream.getvalue(), dtype=np.uint8)
+        # "Decode" the image from the array, preserving colour
+        frame_bgr = cv2.imdecode(data, 1)
+        #_, frame_bgr = webcam.read()
         _, frame_bgr1 = webcam1.read()
         orig_frame = frame_bgr.copy()
         orig_frame1 = frame_bgr1.copy()
